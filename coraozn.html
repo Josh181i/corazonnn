@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi corazón compilando...</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #2d2d30;
+            padding: 8px 15px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #3e3e42;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+        
+        .logo-icon {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #0078d7, #5c2d91);
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+        
+        .menu-bar {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .menu-item {
+            font-size: 13px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 3px;
+            transition: background 0.2s;
+        }
+        
+        .menu-item:hover {
+            background: #3e3e42;
+        }
+        
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 60px;
+            background: #333337;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 15px;
+            border-right: 1px solid #3e3e42;
+        }
+        
+        .sidebar-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .sidebar-icon:hover, .sidebar-icon.active {
+            background: #3e3e42;
+        }
+        
+        .editor-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #2d2d30;
+            border-bottom: 1px solid #3e3e42;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            font-size: 13px;
+            background: #2d2d30;
+            border-right: 1px solid #3e3e42;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .tab.active {
+            background: #1e1e1e;
+        }
+        
+        .tab-close {
+            margin-left: 8px;
+            opacity: 0.7;
+        }
+        
+        .editor {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        .line-numbers {
+            background: #1e1e1e;
+            padding: 10px 8px;
+            text-align: right;
+            color: #858585;
+            font-size: 14px;
+            line-height: 1.5;
+            user-select: none;
+            border-right: 1px solid #3e3e42;
+        }
+        
+        .code-area {
+            flex: 1;
+            padding: 10px 15px;
+            overflow: auto;
+            line-height: 1.5;
+        }
+        
+        .keyword {
+            color: #569cd6;
+        }
+        
+        .function {
+            color: #dcdcaa;
+        }
+        
+        .string {
+            color: #ce9178;
+        }
+        
+        .comment {
+            color: #6a9955;
+        }
+        
+        .variable {
+            color: #9cdcfe;
+        }
+        
+        .operator {
+            color: #d4d4d4;
+        }
+        
+        .heart {
+            color: #f48771;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .terminal {
+            background: #0c0c0c;
+            height: 150px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            border-top: 1px solid #3e3e42;
+            overflow: auto;
+        }
+        
+        .terminal-line {
+            margin-bottom: 5px;
+        }
+        
+        .terminal-prompt {
+            color: #0dbc79;
+        }
+        
+        .blink {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+        
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
+        .footer {
+            background: #0078d7;
+            padding: 5px 15px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .status-item {
+            margin-right: 15px;
+        }
+        
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #252526;
+            border: 2px solid #0078d7;
+            border-radius: 8px;
+            padding: 20px;
+            width: 400px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            display: none;
+        }
+        
+        .message-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #569cd6;
+        }
+        
+        .message-content {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .message-button {
+            background: #0078d7;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 99;
+            display: none;
+        }
+        
+        /* Nuevos estilos para las ventanas adicionales */
+        .happy-face {
+            font-size: 80px;
+            text-align: center;
+            margin: 20px 0;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .date-selector {
+            margin: 20px 0;
+        }
+        
+        .date-option {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .date-option:hover {
+            background: #3e3e42;
+        }
+        
+        .date-option input {
+            margin-right: 10px;
+        }
+        
+        .hearts-progress {
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background: #2d2d30;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #ff8e8e);
+            width: 0%;
+            transition: width 1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .final-message {
+            text-align: center;
+            font-size: 24px;
+            margin: 20px 0;
+            color: #ff6b6b;
+            animation: glow 2s infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 5px #ff6b6b; }
+            to { text-shadow: 0 0 20px #ff6b6b, 0 0 30px #ff6b6b; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon"></div>
+            <span>Visual Studio - Corazón.csproj</span>
+        </div>
+        <div class="menu-bar">
+            <div class="menu-item">Archivo</div>
+            <div class="menu-item">Editar</div>
+            <div class="menu-item">Ver</div>
+            <div class="menu-item">Compilar</div>
+            <div class="menu-item">Amor</div>
+            <div class="menu-item">Ayuda</div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-icon active">📁</div>
+            <div class="sidebar-icon">🔍</div>
+            <div class="sidebar-icon">🐞</div>
+            <div class="sidebar-icon">❤️</div>
+            <div class="sidebar-icon">⚙️</div>
+        </div>
+        
+        <div class="editor-area">
+            <div class="tabs">
+                <div class="tab active">Corazón.cs <span class="tab-close">×</span></div>
+                <div class="tab">Sentimientos.cs <span class="tab-close">×</span></div>
+                <div class="tab">FuturoJuntos.cs <span class="tab-close">×</span></div>
+            </div>
+            
+            <div class="editor">
+                <div class="line-numbers">
+                    1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19<br>20<br>21<br>22<br>23<br>24<br>25
+                </div>
+                <div class="code-area">
+                    <span class="keyword">using</span> System.<span class="heart">Amor</span>;<br>
+                    <span class="keyword">using</span> System.<span class="heart">Felicidad</span>;<br>
+                    <span class="keyword">using</span> System.<span class="heart">Futuro</span>;<br>
+                    <br>
+                    <span class="keyword">namespace</span> <span class="function">MiVida</span><br>
+                    {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public class</span> <span class="function">Corazón</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;{<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">private</span> <span class="variable">bool</span> <span class="variable">latido</span> <span class="operator">=</span> <span class="keyword">true</span>;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">private</span> <span class="variable">string</span> <span class="variable">destino</span> <span class="operator">=</span> <span class="string">"Tú"</span>;<br>
+                    <br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public</span> <span class="variable">void</span> <span class="function">LatePorTi</span>()<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">while</span>(<span class="variable">latido</span>)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="function">Console</span>.<span class="function">WriteLine</span>(<span class="string">"❤️ Mi corazón late por ti ❤️"</span>);<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="function">System</span>.<span class="function">Threading</span>.<span class="function">Thread</span>.<span class="function">Sleep</span>(<span class="number">1000</span>);<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                    <br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public</span> <span class="variable">string</span> <span class="function">MiFuturo</span>()<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="string">"Contigo"</span>;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                    }<br>
+                    <br>
+                    <span class="comment">// Compilando sentimientos... ✅</span><br>
+                    <span class="comment">// Build: Amor.exe - Sin errores ❤️</span>
+                </div>
+            </div>
+            
+            <div class="terminal">
+                <div class="terminal-line">
+                    <span class="terminal-prompt">PS></span> Ejecutando Corazón.exe...
+                </div>
+                <div class="terminal-line">
+                    ❤️ Mi corazón late por ti ❤️
+                </div>
+                <div class="terminal-line">
+                    ❤️ Mi corazón late por ti ❤️
+                </div>
+                <div class="terminal-line">
+                    ❤️ Mi corazón late por ti ❤️
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-prompt">PS></span> <span class="blink">_</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <div class="footer-left">
+            <span class="status-item">Línea 25, Columna 13</span>
+            <span class="status-item">Espacios: 4</span>
+            <span class="status-item">UTF-8</span>
+            <span class="status-item">LF</span>
+        </div>
+        <div class="footer-right">
+            <span class="status-item">100%</span>
+            <span class="status-item">❤️</span>
+        </div>
+    </div>
+    
+    <!-- Ventana de mensaje inicial -->
+    <div class="overlay" id="overlay"></div>
+    
+    <div class="message-box" id="messageBox">
+        <div class="message-title">Mensaje Importante</div>
+        <div class="message-content">
+            Al compilar mi corazón, descubrí que el único error que tenía era no tenerte cerca. 
+            Cada línea de código que escribo pienso en ti. ¿Te gustaría salir conmigo algún día?
+        </div>
+        <button class="message-button" onclick="showHappyFace()">Aceptar ❤️</button>
+    </div>
+    
+    <!-- Segunda ventana con carita feliz -->
+    <div class="message-box" id="happyFaceBox" style="width: 450px; display: none;">
+        <div class="message-title">¡Eres increíble! 🥰</div>
+        <div class="happy-face">😍</div>
+        <div class="message-content" style="text-align: center;">
+            ¡Me acabas de hacer el programador más feliz del mundo! 
+            Ahora elige cuántas veces te gustaría que salgamos:
+        </div>
+        
+        <div class="date-selector">
+            <div class="date-option">
+                <input type="radio" id="oneDate" name="dates" value="1">
+                <label for="oneDate">Una vez, para empezar con algo especial</label>
+            </div>
+            <div class="date-option">
+                <input type="radio" id="fewDates" name="dates" value="3">
+                <label for="fewDates">Unas pocas veces, para conocernos mejor</label>
+            </div>
+            <div class="date-option">
+                <input type="radio" id="manyDates" name="dates" value="7">
+                <label for="manyDates">Muchas veces, porque contigo el tiempo vuela</label>
+            </div>
+            <div class="date-option">
+                <input type="radio" id="infiniteDates" name="dates" value="999">
+                <label for="infiniteDates">Todas las veces posibles, hasta el infinito y más allá</label>
+            </div>
+        </div>
+        
+        <button class="message-button" onclick="scheduleDates()">Programar Salidas</button>
+    </div>
+    
+    <!-- Tercera ventana con barra de progreso -->
+    <div class="message-box" id="progressBox" style="width: 500px; display: none;">
+        <div class="message-title">Programando nuestras salidas...</div>
+        
+        <div class="hearts-progress">
+            <div>Inicializando sistema de citas...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+            <div id="progressText">Preparando todo para nuestras salidas ❤️</div>
+        </div>
+        
+        <div class="final-message" id="finalMessage" style="display: none;">
+            ¡Salidas Programadas! Te amo 💖
+        </div>
+    </div>
+
+    <script>
+        // Mostrar el mensaje después de 3 segundos
+        setTimeout(function() {
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('messageBox').style.display = 'block';
+        }, 3000);
+        
+        function showHappyFace() {
+            document.getElementById('messageBox').style.display = 'none';
+            document.getElementById('happyFaceBox').style.display = 'block';
+        }
+        
+        function scheduleDates() {
+            const selectedOption = document.querySelector('input[name="dates"]:checked');
+            
+            if (!selectedOption) {
+                alert("Por favor, selecciona una opción primero ❤️");
+                return;
+            }
+            
+            document.getElementById('happyFaceBox').style.display = 'none';
+            document.getElementById('progressBox').style.display = 'block';
+            
+            // Animar la barra de progreso
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const finalMessage = document.getElementById('finalMessage');
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 1;
+                progressFill.style.width = progress + '%';
+                progressFill.textContent = progress + '%';
+                
+                if (progress === 25) {
+                    progressText.textContent = "Reservando los mejores lugares... 💕";
+                } else if (progress === 50) {
+                    progressText.textContent = "Planificando momentos especiales... ✨";
+                } else if (progress === 75) {
+                    progressText.textContent = "Preparando sorpresas para ti... 🎁";
+                } else if (progress === 100) {
+                    progressText.textContent = "¡Todo listo!";
+                    clearInterval(interval);
+                    
+                    // Mostrar mensaje final después de un breve retraso
+                    setTimeout(() => {
+                        finalMessage.style.display = 'block';
+                        
+                        // Cerrar todo después de 5 segundos
+                        setTimeout(() => {
+                            document.getElementById('overlay').style.display = 'none';
+                            document.getElementById('progressBox').style.display = 'none';
+                        }, 5000);
+                    }, 1000);
+                }
+            }, 50);
+        }
+        
+        // Simular escritura en la terminal
+        const terminal = document.querySelector('.terminal');
+        let lineCount = 0;
+        
+        function addTerminalLine() {
+            if (lineCount < 10) {
+                const newLine = document.createElement('div');
+                newLine.className = 'terminal-line';
+                newLine.textContent = '❤️ Mi corazón late por ti ❤️';
+                terminal.appendChild(newLine);
+                terminal.scrollTop = terminal.scrollHeight;
+                lineCount++;
+            }
+        }
+        
+        setInterval(addTerminalLine, 2000);
+    </script>
+</body>
+</html>
